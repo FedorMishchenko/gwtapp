@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,15 +94,64 @@ public class GwtApplication extends VerticalPanel {
     }
 
     private void sortGrid() {
-        values.sort(isSorted ? Comparator.naturalOrder() : Comparator.reverseOrder());
+        Integer[] array = new Integer[values.size()];
+        fillArray(array);
+        quickSort(array, 0, array.length - 1);
+        if(!isSorted) {
+            reverse(array);
+        }
+        values = Arrays.asList(array);
         isSorted = !isSorted;
         fillGrid();
     }
 
+    private void fillArray(Integer[] array) {
+        for (int i = 0; i < values.size(); i++){
+            array[i] = values.get(i);
+        }
+    }
+
+    private void reverse(Integer[] array){
+        for (int i = 0; i < array.length / 2; i++) {
+            int temp = array[array.length - i - 1];
+            array[array.length - i - 1] = array[i];
+            array[i] = temp;
+        }
+    }
+
+    private void quickSort(Integer[] array, int low, int high) {
+        if (array.length == 0 || low >= high)
+            return;
+
+        int middle = low + (high - low) / 2;
+        int barrier = array[middle];
+
+        int i = low, j = high;
+        while (i <= j) {
+            while (array[i] < barrier) {
+                i++;
+            }
+            while (array[j] > barrier) {
+                j--;
+            }
+            if (i <= j) {
+                int temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+                i++;
+                j--;
+            }
+        }
+        if (low < j)
+            quickSort(array, low, j);
+
+        if (high > i)
+            quickSort(array, i, high);
+    }
+
     private void setupGrid(int rowsCount) {
         isSorted = false;
-        values = Stream.concat(Stream.generate(() -> (int) (Math.random() * MAX))
-                .filter(value -> value <= 30)
+        values = Stream.concat(Stream.generate(() -> (int) (Math.random() * EXPECTED_NUM))
                 .limit(1), Stream.generate(() -> (int) (Math.random() * MAX))
                 .limit(rowsCount - 1))
                 .collect(Collectors.toList());

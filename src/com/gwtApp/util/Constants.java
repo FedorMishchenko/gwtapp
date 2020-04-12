@@ -18,6 +18,7 @@ public final class Constants {
     public static final String BUTTONS_WIDTH = "60";
     public static final int PADDING = 5;
     public static final int LIMIT = 10;
+    public static final int EXPECTED_NUM = 30;
     public static final int MAX = 1000;
 
     private Constants(){ throw new UnsupportedOperationException("Utility class");}
