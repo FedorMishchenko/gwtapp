@@ -1,11 +1,11 @@
 package com.gwtApp.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -72,7 +72,6 @@ public class GwtApplication extends VerticalPanel {
         numbersPanel.add(sendButton);
         numbersPanel.add(invalidInputDataMassage);
         add(numbersPanel);
-        add(lblServerReply);
         setComponentsLocation(question);
     }
 
@@ -160,10 +159,16 @@ public class GwtApplication extends VerticalPanel {
 
     private void fillGrid() {
         int columnsCount = values.size() / LIMIT;
-        int columnIndex = 0;
+        final int[] columnIndex = {0};
         while (columnsCount-- >= 0) {
             AtomicInteger rowIndex = new AtomicInteger();
-            fillColumn(rowIndex, columnIndex++);
+            Timer timer = new Timer() {
+                @Override
+                public void run() {
+                    fillColumn(rowIndex, columnIndex[0]++);
+                }
+            };
+            timer.schedule(DELAY);
         }
     }
 
@@ -180,7 +185,8 @@ public class GwtApplication extends VerticalPanel {
         Button button = new Button(value);
         button.addClickHandler(event -> {
             if(Integer.parseInt(button.getText()) <= 30){
-                setupGrid(count);
+                grid.clear();
+                setupGrid(Integer.parseInt(button.getText()));
             } else {
                 PopupPanel popup = new PopupPanel(true, true);
                 popup.setPopupPosition(500, 10);
