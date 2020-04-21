@@ -35,8 +35,8 @@ public class GwtApplication extends VerticalPanel {
 
         sendButton.addClickHandler(event -> {
             invalidInputDataMassage.setText(userInput
-                            .getValue()
-                            .matches(INPUT_REGEX) ? BLANK : INVALID_DATA_MASSAGE);
+                    .getValue()
+                    .matches(INPUT_REGEX) ? BLANK : INVALID_DATA_MASSAGE);
             if (BLANK.equals(invalidInputDataMassage.getText())) {
                 count = Integer.parseInt(userInput.getText());
                 displaySortScreen();
@@ -96,7 +96,7 @@ public class GwtApplication extends VerticalPanel {
         Integer[] array = new Integer[values.size()];
         fillArray(array);
         quickSort(array, 0, array.length - 1);
-        if(!isSorted) {
+        if (!isSorted) {
             reverse(array);
         }
         values = Arrays.asList(array);
@@ -105,16 +105,20 @@ public class GwtApplication extends VerticalPanel {
     }
 
     private void fillArray(Integer[] array) {
-        for (int i = 0; i < values.size(); i++){
+        for (int i = 0; i < values.size(); i++) {
             array[i] = values.get(i);
         }
     }
 
-    private void reverse(Integer[] array){
+    private void reverse(Integer[] array) {
         for (int i = 0; i < array.length / 2; i++) {
             int temp = array[array.length - i - 1];
             array[array.length - i - 1] = array[i];
             array[i] = temp;
+            if (!isSorted){
+                values = Arrays.asList(array);
+                fillGrid();
+            }
         }
     }
 
@@ -139,6 +143,10 @@ public class GwtApplication extends VerticalPanel {
                 array[j] = temp;
                 i++;
                 j--;
+                if (isSorted){
+                    values = Arrays.asList(array);
+                    fillGrid();
+                }
             }
         }
         if (low < j)
@@ -162,13 +170,7 @@ public class GwtApplication extends VerticalPanel {
         final int[] columnIndex = {0};
         while (columnsCount-- >= 0) {
             AtomicInteger rowIndex = new AtomicInteger();
-            Timer timer = new Timer() {
-                @Override
-                public void run() {
-                    fillColumn(rowIndex, columnIndex[0]++);
-                }
-            };
-            timer.schedule(DELAY);
+            fillColumn(rowIndex, columnIndex[0]++);
         }
     }
 
@@ -177,14 +179,22 @@ public class GwtApplication extends VerticalPanel {
         values.stream()
                 .skip(columnIndex * LIMIT)
                 .limit(LIMIT)
-                .forEach(num -> grid.setWidget(rowIndex.getAndIncrement(),
-                        columnIndex, getWidget(String.valueOf(num))));
+                .forEach(num -> {
+                    Timer timer = new Timer() {
+                        @Override
+                        public void run() {
+                            grid.setWidget(rowIndex.getAndIncrement(),
+                                    columnIndex, getWidget(String.valueOf(num)));
+                        }
+                    };
+                    timer.schedule(DELAY);
+                });
     }
 
     private Button getWidget(String value) {
         Button button = new Button(value);
         button.addClickHandler(event -> {
-            if(Integer.parseInt(button.getText()) <= 30){
+            if (Integer.parseInt(button.getText()) <= 30) {
                 grid.clear();
                 setupGrid(Integer.parseInt(button.getText()));
             } else {
